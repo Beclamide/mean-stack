@@ -548,12 +548,6 @@ module.exports = function(grunt) {
           remote: 'git@heroku.com:name-of-my-app-here.git',
           branch: 'master'
         }
-      },
-      openshift: {
-        options: {
-          remote: 'openshift',
-          branch: 'master'
-        }
       }
     }
 
