@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = function(grunt) {
-  
+
 
   require('load-grunt-tasks')(grunt);
 
@@ -22,7 +22,7 @@ module.exports = function(grunt) {
     },
 
     // -----
-    // Express
+    // Express: To launch the Express server
     express: {
       options: {
         port: process.env.PORT || 9000
@@ -33,7 +33,7 @@ module.exports = function(grunt) {
           debug: true
         }
       },
-      prod: { // we'd only need this if we're building for production (which we're not in this demo)
+      prod: {
         options: {
           script: 'dist/server/app.js'
         }
@@ -42,9 +42,9 @@ module.exports = function(grunt) {
 
 
     // -----
-    // Clean
+    // Clean: Cleans out the distribution folder
     clean: {
-      dist: { // we'd only need this if we're building for production (which we're not in this demo)
+      dist: {
         files: [{
           dot: true,
           src: [
@@ -62,7 +62,7 @@ module.exports = function(grunt) {
 
 
     // -------
-    // Concurrent
+    // Concurrent: Speed up build process by running tasks in parallel
     concurrent: {
       server: [
         'sass'
@@ -79,11 +79,66 @@ module.exports = function(grunt) {
           logConcurrentOutput: true
         }
       },
-      dist: [ // we'd only need this if we're building for production (which we're not in this demo)
+      dist: [
         'sass',
         'imagemin',
         'svgmin'
       ]
+    },
+
+
+
+    // ----
+    // Node Inspector: Debugging
+    'node-inspector': {
+      custom: {
+        options: {
+          'web-host': 'localhost'
+        }
+      }
+    },
+
+
+    // ----
+    // Nodemon: run server in debug mode with an initial breakpoint
+    nodemon: {
+      debug: {
+        script: 'server/app.js',
+        options: {
+          nodeArgs: ['--debug-brk'],
+          env: {
+            PORT: process.env.PORT || 9000
+          },
+          callback: function (nodemon) {
+            nodemon.on('log', function (event) {
+              console.log(event.colour);
+            });
+
+            // opens browser on initial server start
+            nodemon.on('config:update', function () {
+              setTimeout(function () {
+                require('open')('http://localhost:<%= express.options.port %>/debug?port=5858');
+              }, 500);
+            });
+          }
+        }
+      }
+    },
+
+
+    // ----
+    // Rev: Renames files for browser caching purposes
+    rev: {
+      dist: {
+        files: {
+          src: [
+            'dist/public/{,*/}*.js',
+            'dist/public/{,*/}*.css',
+            'dist/public/assets/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}',
+            'dist/public/assets/fonts/*'
+          ]
+        }
+      }
     },
 
 
@@ -95,8 +150,155 @@ module.exports = function(grunt) {
       }
     },
 
+
     // ----
-    // Watch
+    // ngAnnotate: Allow the use of non-minsafe AngularJS files.
+    ngAnnotate: {
+      dist: {
+        files: [{
+          expand: true,
+          cwd: '.tmp/concat',
+          src: '*/**.js',
+          dest: '.tmp/concat'
+        }]
+      }
+    },
+
+
+    // ----
+    // ngtemplates: Package all the html partials into a single javascript payload
+    ngtemplates: {
+      options: {
+        // This should be the name of your apps angular module
+        module: 'MyApp',
+        htmlmin: {
+          collapseBooleanAttributes: true,
+          collapseWhitespace: true,
+          removeAttributeQuotes: true,
+          removeEmptyAttributes: true,
+          removeRedundantAttributes: true,
+          removeScriptTypeAttributes: true,
+          removeStyleLinkTypeAttributes: true
+        },
+        usemin: 'app/app.js'
+      },
+      main: {
+        cwd: 'client',
+        src: ['{app,components}/**/*.html'],
+        dest: '.tmp/templates.js'
+      },
+      tmp: {
+        cwd: '.tmp',
+        src: ['{app,components}/**/*.html'],
+        dest: '.tmp/tmp-templates.js'
+      }
+    },
+
+
+
+    // ----
+    // Minifiers
+    useminPrepare: {
+      html: ['client/index.html'],
+      options: {
+        dest: 'dist/public'
+      }
+    },
+
+    // Performs rewrites based on rev and the useminPrepare configuration
+    usemin: {
+      html: ['dist/public/{,*/}*.html'],
+      css: ['dist/public/{,*/}*.css'],
+      js: ['dist/public/{,*/}*.js'],
+      options: {
+        assetsDirs: [
+          'dist/public',
+          'dist/public/assets/images'
+        ],
+        // This is so we update image references in our ng-templates
+        patterns: {
+          js: [
+            [/(assets\/images\/.*?\.(?:gif|jpeg|jpg|png|webp|svg))/gm, 'Update the JS to reference our revved images']
+          ]
+        }
+      }
+    },
+
+    // The following *-min tasks produce minified files in the dist folder
+    imagemin: {
+      dist: {
+        files: [{
+          expand: true,
+          cwd: 'client/assets/images',
+          src: '{,*/}*.{png,jpg,jpeg,gif}',
+          dest: 'dist/public/assets/images'
+        }]
+      }
+    },
+
+    svgmin: {
+      dist: {
+        files: [{
+          expand: true,
+          cwd: 'client/assets/images',
+          src: '{,*/}*.svg',
+          dest: 'dist/public/assets/images'
+        }]
+      }
+    },
+
+
+    // ----
+    // Copy: Copies remaining files to places other tasks can use
+    copy: {
+      dist: {
+        files: [{
+          expand: true,
+          dot: true,
+          cwd: 'client',
+          dest: 'dist/public',
+          src: [
+            '*.{ico,png,txt}',
+            '.htaccess',
+            'bower_components/**/*',
+            'assets/images/{,*/}*.{webp}',
+            'assets/fonts/**/*',
+            'index.html'
+          ]
+        }, {
+          expand: true,
+          cwd: '.tmp/images',
+          dest: 'dist/public/assets/images',
+          src: ['generated/*']
+        }, {
+          expand: true,
+          dest: 'dist',
+          src: [
+            'package.json',
+            'server/**/*'
+          ]
+        }]
+      },
+      styles: {
+        expand: true,
+        cwd: 'client',
+        dest: '.tmp/',
+        src: ['{app,components}/**/*.css']
+      }
+    },
+
+
+    // ----
+    // cdnify: Replace Google CDN references
+    cdnify: {
+      dist: {
+        html: ['dist/public/*.html']
+      }
+    },
+
+
+    // ----
+    // Watch: Watches files for changes
     watch: {
       injectJS: {
         files: [
@@ -328,6 +530,31 @@ module.exports = function(grunt) {
           ]
         }
       }
+    },
+
+
+    // ----
+    // BuildControl
+    buildcontrol: {
+      options: {
+        dir: 'dist',
+        commit: true,
+        push: true,
+        connectCommits: false,
+        message: 'Built %sourceName% from commit %sourceCommit% on branch %sourceBranch%'
+      },
+      heroku: {
+        options: {
+          remote: 'git@heroku.com:name-of-my-app-here.git',
+          branch: 'master'
+        }
+      },
+      openshift: {
+        options: {
+          remote: 'openshift',
+          branch: 'master'
+        }
+      }
     }
 
   });
@@ -395,6 +622,27 @@ module.exports = function(grunt) {
       'test:client'
     ]);
   });
+
+
+
+  grunt.registerTask('build', [
+    'clean:dist',
+    'injector:sass',
+    'concurrent:dist',
+    'injector',
+    'wiredep',
+    'useminPrepare',
+    'autoprefixer',
+    'ngtemplates',
+    'concat',
+    'ngAnnotate',
+    'copy:dist',
+    'cdnify',
+    'cssmin',
+    'uglify',
+    'rev',
+    'usemin'
+  ]);
 
 
 }
