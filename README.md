@@ -1,6 +1,6 @@
 # Bare-bones MEAN Stack Application
 ### By John Bower
-T: @beclamide |  E: [john@industrialassets.co.uk](mailto:john@industrialassets.co.uk)
+[@beclamide](http://www.twitter.com/beclamide)
 
 ---
 
