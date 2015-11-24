@@ -1,0 +1,9 @@
+@import 'bootstrap-sass/assets/stylesheets/bootstrap';
+
+
+
+// Component styles are injected through grunt
+// injector
+@import 'states/main/main.scss';
+@import 'global/header/header.scss';
+// endinjector

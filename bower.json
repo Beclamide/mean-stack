@@ -1,0 +1,16 @@
+{
+  "name": "sky_test",
+  "version": "1.0.0",
+  "dependencies": {
+    "angular": "~1.4.8",
+    "angular-ui-router": "~0.2.15",
+    "bootstrap": "~3.3.5",
+    "bootstrap-sass": "bootstrap-sass-official#~3.3.5",
+    "bootstrap-toggle": "~2.2.1",
+    "ng-lodash": "~0.3.0",
+    "components-font-awesome": "~4.4.0"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.4.8"
+  }
+}

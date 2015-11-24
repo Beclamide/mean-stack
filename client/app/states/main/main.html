@@ -1,0 +1,47 @@
+<div class="row">
+
+  <div class="col-md-12">
+
+    <h1>Welcome!</h1>
+
+    <p>If this is all working you should see some responses from the API below.</p>
+
+  </div>
+
+</div>
+
+
+<!-- Bit of vertical space -->
+<div class="form-group">
+  &nbsp;
+</div>
+
+
+
+<div class="main row">
+
+  <div class="col-md-12">
+
+    <div class="panel row" ng-repeat="item in response">
+
+      <div class="col-md-2">
+        <img src="http://placehold.it/250x250" class="img-responsive" />
+      </div>
+
+      <div class="col-md-10">
+
+        <h2>{{item.name.first}} {{item.name.last}}</h2>
+
+        <p>{{item.address}}</p>
+
+        <small><i class="fa fa-phone"></i> {{item.phone}}</small> <br/>
+        <small><i class="fa fa-envelope-o"></i> {{item.email}}</small>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+</div>
