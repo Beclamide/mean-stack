@@ -2,9 +2,11 @@
 
 module.exports = function(grunt) {
 
-
+  // Load all of the tasks
   require('load-grunt-tasks')(grunt);
 
+  // Set options (can be overridden by command line)
+  var port = grunt.option('port') || 9000;
 
   grunt.initConfig({
 
@@ -25,7 +27,7 @@ module.exports = function(grunt) {
     // Express: To launch the Express server
     express: {
       options: {
-        port: process.env.PORT || 9000
+        port: process.env.PORT || port
       },
       dev: {
         options: {
@@ -107,7 +109,7 @@ module.exports = function(grunt) {
         options: {
           nodeArgs: ['--debug-brk'],
           env: {
-            PORT: process.env.PORT || 9000
+            PORT: process.env.PORT || port
           },
           callback: function (nodemon) {
             nodemon.on('log', function (event) {
