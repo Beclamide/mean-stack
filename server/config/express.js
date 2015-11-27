@@ -16,7 +16,7 @@ module.exports = function (app) {
 
   if ('development' === env || 'test' === env) {
     // Create the Express server for the development environment
-    app.use(favicon(path.join(config.root, 'client', 'assets/images/favicon.png')));
+    app.use(favicon(path.join(config.root, 'client', 'favicon.png')));
     app.use(require('connect-livereload')());
     app.use(express.static(path.join(config.root, '.tmp')));
     app.use(express.static(path.join(config.root, 'client')));
@@ -26,8 +26,10 @@ module.exports = function (app) {
 
 
   if ('production' === env) {
-    // Here we do the same as above but without LiveReload etc.
-    // also because we build to a 'dist' folder, file locations would be different.
+    // Create the Express server for the production environment
+    app.use(favicon(path.join(config.root, 'public', 'favicon.png')));
+    app.use(express.static(path.join(config.root, 'public')));
+    app.set('appPath', config.root + '/public');
   }
 
 

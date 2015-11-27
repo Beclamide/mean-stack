@@ -2,29 +2,62 @@
 
 module.exports = function(grunt) {
 
-  // Load all of the tasks
+
+  var localConfig;
+  try {
+    localConfig = require('./server/config/local.env');
+  } catch(e) {
+    localConfig = {};
+  }
+
+
+
+  // Load all of the tasks in package.json
   require('load-grunt-tasks')(grunt);
 
-  // Set options (can be overridden by command line)
+
+
+  /*
+
+    Options (can be overridden by command line parameters such as --port or --appname)
+    Make sure you change these when starting a new project
+
+  */
+
+  // Port: This is the port the server should run on
   var port = grunt.option('port') || 9000;
+
+  // App Name: This is the ng-app name in client/index.html and Angular files.
+  var appName = grunt.option('appname') || 'MyApp';
+
+  // Heroku App Name: This is the name of your app on Heroku
+  var herokuAppName = grunt.option('herokuAppName') || 'mean-template';
+
+
+
+
+
+
+
+
+  // --- You shouldn't need to change anything below this point ---
 
   grunt.initConfig({
 
     pkg: grunt.file.readJSON('package.json'),
 
-    // -----
-    // Environment
+    // environment
     env: {
       test: {
         NODE_ENV: 'test'
       },
       prod: {
         NODE_ENV: 'production'
-      }
+      },
+      all: localConfig
     },
 
-    // -----
-    // Express: To launch the Express server
+    // express: To launch the Express server
     express: {
       options: {
         port: process.env.PORT || port
@@ -43,8 +76,7 @@ module.exports = function(grunt) {
     },
 
 
-    // -----
-    // Clean: Cleans out the distribution folder
+    // clean: Cleans out the distribution and temp folders
     clean: {
       dist: {
         files: [{
@@ -63,8 +95,7 @@ module.exports = function(grunt) {
 
 
 
-    // -------
-    // Concurrent: Speed up build process by running tasks in parallel
+    // concurrent: Speed up build process by running tasks in parallel
     concurrent: {
       server: [
         'sass'
@@ -90,8 +121,7 @@ module.exports = function(grunt) {
 
 
 
-    // ----
-    // Node Inspector: Debugging
+    // node-inspector: Debugging
     'node-inspector': {
       custom: {
         options: {
@@ -101,8 +131,7 @@ module.exports = function(grunt) {
     },
 
 
-    // ----
-    // Nodemon: run server in debug mode with an initial breakpoint
+    // nodemon: run server in debug mode with an initial breakpoint
     nodemon: {
       debug: {
         script: 'server/app.js',
@@ -119,7 +148,7 @@ module.exports = function(grunt) {
             // opens browser on initial server start
             nodemon.on('config:update', function () {
               setTimeout(function () {
-                require('open')('http://localhost:<%= express.options.port %>/debug?port=5858');
+                require('open')('http://localhost:' + port + '/debug?port=5858');
               }, 500);
             });
           }
@@ -128,8 +157,7 @@ module.exports = function(grunt) {
     },
 
 
-    // ----
-    // Rev: Renames files for browser caching purposes
+    // rev: Renames files for browser caching purposes
     rev: {
       dist: {
         files: {
@@ -144,16 +172,14 @@ module.exports = function(grunt) {
     },
 
 
-    // ----
-    // Open
+    // open: Opens the app in your default browser
     open: {
       server: {
-        url: 'http://localhost:<%= express.options.port %>'
+        url: 'http://localhost:' + port
       }
     },
 
 
-    // ----
     // ngAnnotate: Allow the use of non-minsafe AngularJS files.
     ngAnnotate: {
       dist: {
@@ -167,12 +193,10 @@ module.exports = function(grunt) {
     },
 
 
-    // ----
     // ngtemplates: Package all the html partials into a single javascript payload
     ngtemplates: {
       options: {
-        // This should be the name of your apps angular module
-        module: 'MyApp',
+        module: appName,
         htmlmin: {
           collapseBooleanAttributes: true,
           collapseWhitespace: true,
@@ -198,8 +222,7 @@ module.exports = function(grunt) {
 
 
 
-    // ----
-    // Minifiers
+    // useminPrepare: Setup usemin for minification tasks
     useminPrepare: {
       html: ['client/index.html'],
       options: {
@@ -207,7 +230,7 @@ module.exports = function(grunt) {
       }
     },
 
-    // Performs rewrites based on rev and the useminPrepare configuration
+    // usemin: Performs rewrites based on rev and the useminPrepare configuration
     usemin: {
       html: ['dist/public/{,*/}*.html'],
       css: ['dist/public/{,*/}*.css'],
@@ -226,7 +249,7 @@ module.exports = function(grunt) {
       }
     },
 
-    // The following *-min tasks produce minified files in the dist folder
+    // imagemin: Compress PNG, GIF, and JPEGs and place them in the dist folder
     imagemin: {
       dist: {
         files: [{
@@ -238,6 +261,7 @@ module.exports = function(grunt) {
       }
     },
 
+    // svgmin: Compress SVG files and place them in the dist folder
     svgmin: {
       dist: {
         files: [{
@@ -250,8 +274,7 @@ module.exports = function(grunt) {
     },
 
 
-    // ----
-    // Copy: Copies remaining files to places other tasks can use
+    // copy: Copies remaining files to places other tasks can use
     copy: {
       dist: {
         files: [{
@@ -290,8 +313,7 @@ module.exports = function(grunt) {
     },
 
 
-    // ----
-    // cdnify: Replace Google CDN references
+    // cdnify: Swap out local references of scripts available on Google CDN
     cdnify: {
       dist: {
         html: ['dist/public/*.html']
@@ -299,8 +321,7 @@ module.exports = function(grunt) {
     },
 
 
-    // ----
-    // Watch: Watches files for changes
+    // watch: Watches files for changes
     watch: {
       injectJS: {
         files: [
@@ -367,7 +388,7 @@ module.exports = function(grunt) {
     },
 
 
-    // Test settings ------
+    // karma: Load in the karma conf file
     karma: {
       unit: {
         configFile: 'karma.conf.js',
@@ -375,6 +396,8 @@ module.exports = function(grunt) {
       }
     },
 
+
+    // mochaTest: Set up Mocha for testing scripts
     mochaTest: {
       options: {
         reporter: 'list'
@@ -382,9 +405,8 @@ module.exports = function(grunt) {
       src: ['server/**/*.test.js']
     },
 
-    // ----
-    // Make sure yur code doesn't suck
 
+    // jshint: Make sure yur code doesn't suck
     jshint: {
       options: {
         jshintrc: 'client/.jshintrc',
@@ -419,8 +441,7 @@ module.exports = function(grunt) {
     },
 
 
-    // -----
-    // Compiles Sass to CSS
+    // sass: Compiles all client-side SASS files to a single CSS
     sass: {
       server: {
         options: {
@@ -438,21 +459,7 @@ module.exports = function(grunt) {
     },
 
 
-
-    // ------
-    // Automatically inject Bower components into the app
-    wiredep: {
-      target: {
-        src: 'client/index.html',
-        ignorePath: 'client/',
-        exclude: [/bootstrap-sass-official/, /bootstrap.js/, /bootstrap.css/]
-      }
-    },
-
-
-
-    // ------
-    // Add vendor prefixed styles
+    // autoprefixer: Add vendor prefixed styles to the CSS
     autoprefixer: {
       options: {
         browsers: ['last 1 version']
@@ -468,13 +475,23 @@ module.exports = function(grunt) {
     },
 
 
+    // wiredep: Automatically inject Bower components into index.html
+    wiredep: {
+      target: {
+        src: 'client/index.html',
+        ignorePath: 'client/',
+        exclude: [/bootstrap-sass-official/, /bootstrap.js/, /bootstrap.css/]
+      }
+    },
 
-    // ------
-    // Inject application script files into index.html (doesn't include bower)
+
+    // injector: Inject JS and SCSS file references when files are changed
     injector: {
       options: {
 
       },
+
+      // scripts: Inject application script files into index.html
       scripts: {
         options: {
           transform: function(filePath) {
@@ -496,7 +513,7 @@ module.exports = function(grunt) {
         }
       },
 
-      // Inject component scss into app.scss
+      // sass: Inject component scss into app.scss
       sass: {
         options: {
           transform: function(filePath) {
@@ -515,7 +532,7 @@ module.exports = function(grunt) {
         }
       },
 
-      // Inject component css into index.html
+      // css: Inject component css into index.html
       css: {
         options: {
           transform: function(filePath) {
@@ -535,8 +552,7 @@ module.exports = function(grunt) {
     },
 
 
-    // ----
-    // BuildControl
+    // buildcontrol: Handles the upload of the dist folder contents to Heroku (or any other GIT based hosting provider)
     buildcontrol: {
       options: {
         dir: 'dist',
@@ -547,7 +563,7 @@ module.exports = function(grunt) {
       },
       heroku: {
         options: {
-          remote: 'git@heroku.com:name-of-my-app-here.git',
+          remote: 'git@heroku.com:' + herokuAppName + '.git',
           branch: 'master'
         }
       }
@@ -557,7 +573,11 @@ module.exports = function(grunt) {
 
 
 
-  // Used for delaying livereload until after server has restarted
+
+
+  // --- Tasks
+
+  // wait: Used for delaying livereload until after server has restarted
   grunt.registerTask('wait', function() {
     grunt.log.ok('Waiting for server reload...');
 
@@ -570,7 +590,19 @@ module.exports = function(grunt) {
   });
 
 
+  grunt.registerTask('express-keepalive', 'Keep grunt running', function() {
+    this.async();
+  });
+
+
+  // serve: Run injectors and compilers
   grunt.registerTask('serve', function(target) {
+
+    // serve the dist folder
+    if (target === 'dist') {
+      return grunt.task.run(['build', 'env:all', 'env:prod', 'express:prod', 'wait', 'open', 'express-keepalive']);
+    }
+
     grunt.task.run([
       'clean:server',
       'injector:sass',
@@ -586,8 +618,7 @@ module.exports = function(grunt) {
   });
 
 
-
-
+  // test: Run tests on the server and client
   grunt.registerTask('test', function(target) {
     if (target === 'server') {
       return grunt.task.run([
@@ -620,7 +651,7 @@ module.exports = function(grunt) {
   });
 
 
-
+  // build: Compress, optimize, uglify, and copy all of the files into the dist folder
   grunt.registerTask('build', [
     'clean:dist',
     'injector:sass',

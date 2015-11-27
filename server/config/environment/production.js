@@ -4,7 +4,15 @@
 module.exports = {
 
   // Here we can specify production environment specific options
-  // for this demo we're just going to assume we're running in development mode
-  // with stubs for data
+
+  // Server IP
+  ip:       process.env.OPENSHIFT_NODEJS_IP ||
+            process.env.IP ||
+            undefined,
+
+  // Server port
+  port:     process.env.OPENSHIFT_NODEJS_PORT ||
+            process.env.PORT ||
+            8080
 
 };
