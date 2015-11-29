@@ -1,3 +1,15 @@
 
 
 // This is where you put page specific styles
+
+.panel {
+
+  & img {
+    margin: 0 0 20px;
+  }
+
+  & h2 {
+    margin: 0;
+  }
+
+}
