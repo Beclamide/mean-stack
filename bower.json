@@ -8,7 +8,7 @@
     "bootstrap-sass": "bootstrap-sass-official#~3.3.5",
     "bootstrap-toggle": "~2.2.1",
     "ng-lodash": "~0.3.0",
-    "components-font-awesome": "~4.4.0"
+    "font-awesome": ">=4.1.0"
   },
   "devDependencies": {
     "angular-mocks": "~1.4.8"

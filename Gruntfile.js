@@ -480,7 +480,7 @@ module.exports = function(grunt) {
       target: {
         src: 'client/index.html',
         ignorePath: 'client/',
-        exclude: [/bootstrap-sass-official/, /bootstrap.js/, /bootstrap.css/]
+        exclude: [/bootstrap-sass-official/, /bootstrap.js/, /bootstrap.css/, /font-awesome.css/ ]
       }
     },
 
@@ -506,8 +506,7 @@ module.exports = function(grunt) {
           'client/index.html': [
             ['{.tmp,client}/{app,components}/**/*.js',
               '!{.tmp,client}/app/app.js',
-              '!{.tmp,client}/{app,components}/**/*.test.js',
-              '!{.tmp,client}/{app,components}/**/*.mock.js'
+              '!{.tmp,client}/{app,components}/**/*.test.js'
             ]
           ]
         }
