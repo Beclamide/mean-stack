@@ -1,4 +1,4 @@
-# Bare-bones MEAN Stack Application
+# Bare-bones Angular Full-stack Application
 ### By John Bower
 [@beclamide](http://www.twitter.com/beclamide)
 
